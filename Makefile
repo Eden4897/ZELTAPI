@@ -22,8 +22,8 @@ USE_PACKAGE:=0
 # Set this to 1 to add additional rules to compile your project as a PROS library template
 IS_LIBRARY:=1
 # TODO: CHANGE THIS!
-LIBNAME:=MEAPI
-VERSION:=0.9.0
+LIBNAME:=ZELTAPI
+VERSION:=0.9.1
 # EXCLUDE_SRC_FROM_LIB= $(SRCDIR)/unpublishedfile.c
 # this line excludes opcontrol.c and similar files
 EXCLUDE_SRC_FROM_LIB+=$(foreach file, $(SRCDIR)/opcontrol $(SRCDIR)/initialize $(SRCDIR)/autonomous,$(foreach cext,$(CEXTS),$(file).$(cext)) $(foreach cxxext,$(CXXEXTS),$(file).$(cxxext)))
@@ -31,13 +31,13 @@ EXCLUDE_SRC_FROM_LIB+=$(foreach file, $(SRCDIR)/opcontrol $(SRCDIR)/initialize $
 # files that get distributed to every user (beyond your source archive) - add
 # whatever files you want here. This line is configured to add all header files
 # that are in the the include directory get exported
-TEMPLATE_FILES=$(INCDIR)/meapi/**/*.* $(INCDIR)/meapi.h $(INCDIR)/meapi/*.*
+TEMPLATE_FILES=$(INCDIR)/zeltapi/**/*.* $(INCDIR)/zeltapi.h $(INCDIR)/zeltapi/*.*
 TEMPLATE_CONFIG_FILES=Makefile common.mk MakeProject.cmd .gitignore
 USER_FILES=$(SRCDIR)/autoplan/*.* $(SRCDIR)/*.*
 
 CREATE_TEMPLATE_FLAGS=$(foreach file,$(USER_FILES),--user "$(file)")
 CREATE_TEMPLATE_FLAGS+=$(foreach file, $(TEMPLATE_CONFIG_FILES),--system "$(ROOT)/$(file)")
-CREATE_TEMPLATE_FLAGS+=--destination ./MEAPI@$(VERSION).zip
+CREATE_TEMPLATE_FLAGS+=--destination ./../../vexLibrary/ZELTAPI@$(VERSION).zip
 
 .DEFAULT_GOAL=quick
 

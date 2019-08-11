@@ -29,7 +29,7 @@ if errorlevel 1 (
 echo [91mWant to fetch the template? [0m
 :fetch-template
 set /P version=[91mWrite the version name: [0m
-prosv5 c f "ZELTAPI@%version%.zip"
+prosv5 c f "../../vexLibrary/ZELTAPI@%version%.zip"
 
 echo [91m--------------------Done--------------------[0m
 echo [91mWant to apply the template to other project?[0m
