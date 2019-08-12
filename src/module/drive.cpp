@@ -1,14 +1,15 @@
 /*********************
-	  includes
+ *     includes
  ********************/
  #include "_header.h"
 
- /*********************
-		 set up
-  ********************/
+/*********************
+ *	    set up
+ ********************/
 bool _hold_move = 0;
 int moveLspeed = 0,moveRspeed = 0,moveLimit = 0,movekeepms = 0;
 float moveTick = 0, moveFix = 0, moveBuffer = 0;
+int fixedAngle, absAngle;
 
 enum angle_detection_sensor_e{
   Gyro, Encoder
@@ -22,10 +23,8 @@ enum brake_mode_e {
 void stopMove();
 void endMove();
 
-extern_motor_group(leftDrive);
-
 /*********************
-		 tasks
+ *      tasks
  ********************/
 void KEEP_MOVE_SERVICE(void* param) {
 	wait(movekeepms);
@@ -57,7 +56,7 @@ void DRIVE_SERVICE(void* param) {
 	while (1) {
 		leftPos = fabs(leftDrive().position());
 		rightPos = fabs(rightDrive().position());
-		if (leftPos > moveTick || rightPos > moveTick) {
+		if (leftPos >= moveTick || rightPos >= moveTick) {
 			driveptr->timer.stopTimer();
 			endMove();
 			break;
@@ -86,7 +85,7 @@ void ABS_DRIVE_SERVICE(void* param) {
 		lcd_print(0, "moveTick = %d", moveTick);
 		lcd_print(1, "leftPos = %d", leftPos);
 		lcd_print(2, "rightPos = %d", rightPos);
-		if (leftPos > moveTick || rightPos > moveTick) {
+		if (leftPos >= moveTick || rightPos >= moveTick) {
 			driveptr->timer.stopTimer();
 			endMove();
 			break;
@@ -136,35 +135,62 @@ void ABS_DRIVE_SERVICE(void* param) {
 
 
 void TURN_SERVICE(void* param) {
-	float leftPos, rightPos;
+  	float leftPos, rightPos;
+    int initGyroPos = fixedAngle;
+    int nowAngleDifference;//basically means the angle the robot has turned
 
-	driveptr->timer.startTimer();
-	while (1) {
-		leftPos = fabs(leftDrive().position());
-		rightPos = fabs(rightDrive().position());
-		lcd_print(0, "moveTick = %d", moveTick);
-		lcd_print(1, "leftPos = %d", leftPos);
-		lcd_print(2, "rightPos = %d", rightPos);
-		if (leftPos > moveTick || rightPos > moveTick) {
-			driveptr->timer.stopTimer();
-			endMove();
-			break;
-		}
-		//returns in cm not ticks for simplicity
-		driveptr->_value = leftDrive().position() / TICKS_PER_DEGREE;
-		wait(5);
-	}
+  	driveptr->timer.startTimer();
+  	while (1) {
+      if(angle_detection_sensor_e_t == Encoder){
+        leftPos = fabs(leftDrive().position());
+    		rightPos = fabs(rightDrive().position());
+    		lcd_print(0, "moveTick = %d", moveTick);
+    		lcd_print(1, "leftPos = %d", leftPos);
+    		lcd_print(2, "rightPos = %d", rightPos);
+    		if (leftPos >= moveTick || rightPos >= moveTick) {
+    			driveptr->timer.stopTimer();
+    			endMove();
+    			break;
+    		}
+    		//returns in deg not ticks for simplicity
+    		driveptr->_value = leftDrive().position() / TICKS_PER_DEGREE;
+      }else{
+        nowAngleDifference = abs(fixedAngle - initGyroPos);
+        if(nowAngleDifference >= moveTick){
+          driveptr->timer.stopTimer();
+    			endMove();
+    			break;
+        }
+        driveptr->_value = nowAngleDifference;
+      }
+
+
+  		wait(5);
+  	}
+
 
 	driveptr->_end = true;
 }
-
+void GYRO_SERVICE(void* param){
+  // pros::ADIAnalogIn sensor(gyroPort);
+  // sensor.calibrate();
+  gyro.reset();
+  int nowPos;
+  while(1){
+    nowPos = gyro.get_value()/10;
+    fixedAngle = nowPos;
+    absAngle = fixedAngle % 360;
+    wait(5);
+  }
+}
 
 
 /*********************
-	basic functions
+ *	basic functions
  ********************/
 void initMove() {
-	pros::Task holdservice(HOLD_MOVE, (void*)"PROS");
+	pros::Task hold_service(HOLD_MOVE);
+  pros::Task gyro_service(GYRO_SERVICE);
 }
 
 
@@ -244,7 +270,7 @@ void endMove() {
 
 
 /*********************
-	  functions
+ *	   functions
  ********************/
 Action forward(int cm, int speed = 0, brake_mode_e brakeMode = MOVE_BRAKE) {
 	Action drive{ 0 };
@@ -342,8 +368,11 @@ Action turnLeft(int degrees, int speed = 0, brake_mode_e brakeMode = MOVE_BRAKE)
 	moveLspeed = -speed;
 	moveRspeed = speed;
 
-	moveTick = degrees * TICKS_PER_DEGREE;
-
+  if(angle_detection_sensor_e_t == Encoder){
+    moveTick = degrees * TICKS_PER_DEGREE;
+  }else{
+    moveTick = degrees;
+  }
 	driveptr = &turn;
 
 	component_type_e_t = Drive;

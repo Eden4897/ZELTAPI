@@ -9,8 +9,11 @@ pros::Motor leftRoller(6);
 pros::Motor rightRoller(10,true);
 pros::Motor leftClaw(19);
 pros::Motor rightClaw(20);
-pros::ADIGyro gyro('A');
+
+int gyroPort = 1;
+pros::ADIGyro gyro(gyroPort);
 pros::Vision vision_sensor (20);
+
 create_motor_group(fullDrive, frontLeft,rearLeft,frontRight,rearRight)
 create_motor_group(leftDrive, frontLeft)
 create_motor_group(rightDrive, frontRight, rearRight)

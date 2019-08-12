@@ -10,6 +10,7 @@ extern_motor_group(clawgrp);
 extern_pid(pidLeftDrive);
 extern_pid(pidRightDrive);
 
+extern int gyroPort;
 extern pros::ADIGyro gyro;
 extern pros::Vision vision_sensor;
 
