@@ -184,6 +184,8 @@ void keepMove(int leftspeed, int rightspeed, int waitms = 0) {
 		rightDrive().move(rightspeed);
 	}
 	else {
+    Action drive{0};
+    driveptr = &drive;
 		moveTick = 1;
 		movekeepms = waitms;
 		leftDrive().move(leftspeed);
@@ -242,7 +244,7 @@ void endMove() {
 	  functions
  ********************/
 Action forward(int cm, int speed = 0, brake_mode_e brakeMode = MOVE_BRAKE) {
-	Action move{ 0 };
+	Action drive{ 0 };
 
 	stopMove();
 
@@ -251,7 +253,7 @@ Action forward(int cm, int speed = 0, brake_mode_e brakeMode = MOVE_BRAKE) {
 
 	moveTick = ((cm / (WHEEL_DIAMETER * 3.14159)) * 900);
 
-	driveptr = &move;
+	driveptr = &drive;
 
 	brake_mode_e_t = brakeMode;
 
@@ -271,7 +273,7 @@ Action forward(int cm, int speed = 0, brake_mode_e brakeMode = MOVE_BRAKE) {
 	else {
 		// pros::Task pid_drive_service(PID_DRIVE_SERVICE);
 	}
-	return move;
+	return drive;
 }
 
 
@@ -281,7 +283,7 @@ Action backward(int cm, int speed = 0, brake_mode_e brakeMode = MOVE_BRAKE) {
 
 
 Action absForward(int cm, int speed = 0, brake_mode_e brakeMode = MOVE_BRAKE, float fix = 0.01, float buffer = 1) {
-	Action move{ 0 };
+	Action drive{ 0 };
 
 	stopMove();
 
@@ -290,7 +292,7 @@ Action absForward(int cm, int speed = 0, brake_mode_e brakeMode = MOVE_BRAKE, fl
 
 	moveTick = ((cm / (WHEEL_DIAMETER * 3.14159)) * 900);
 
-	driveptr = &move;
+	driveptr = &drive;
 
 	component_type_e_t = Drive;
 
@@ -315,7 +317,7 @@ Action absForward(int cm, int speed = 0, brake_mode_e brakeMode = MOVE_BRAKE, fl
 	else {
 		// pros::Task pid_drive_service(PID_ABS_DRIVE_SERVICE);
 	}
-	return move;
+	return drive;
 }
 
 

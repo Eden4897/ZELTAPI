@@ -1,5 +1,3 @@
-#include "configApi.h"
-#include "configMotor.h"
 #include "zeltapi.h"
 void initialize(){
   llemu::init();

@@ -1,43 +1,43 @@
-# Compiled Object files #
+# Compiled Object files
 *.slo
 *.lo
 *.o
 *.obj
-*.json
 
-# Precompiled Headers #
+# Precompiled Headers
 *.gch
 *.pch
 
-# Compiled Dynamic libraries #
+# Compiled Dynamic libraries
 *.so
 *.dylib
 *.dll
 
-# Fortran module files #
+# Fortran module files
 *.mod
 
-# Compiled Static libraries #
+# Compiled Static libraries
 *.lai
 *.la
 *.a
 *.lib
 
-# Executables #
+# Executables
 *.exe
 *.out
 *.app
-*.deb
 
-#custom #
-*.vscode
-*.bin
+#custom
+.vscode/
+/bin/
 /firmware/
 /common.mk
-*.compile_commands.json
+/compile_commands.json
 /project.pros
 /sh.exe.stackdump
-/include/
-*.ini
-*.dll
-*.elf
+/include/okapi
+/include/display
+/include/pros
+/include/api.h
+/include/main.h
+*.zip

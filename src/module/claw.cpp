@@ -35,6 +35,8 @@ void keepClaw(int speed, int waitms = 0){
   if(waitms == 0){
     clawgrp().move(speed);
   }else{
+    Action claw{0};
+    clawptr = &claw;
     isNotFinished = true;
     clawkeepms = waitms;
     clawgrp().move(speed);
