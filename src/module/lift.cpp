@@ -1,41 +1,38 @@
+/**
+ * \file module/lift.cpp
+ *
+ * all lift commands and functions
+ *
+ * Copyright (c) 2019-2020, by Eden Cheung.
+ * All rights reserved
+ */
+/*********************
+ *    INCLUDES
+ ********************/
 #include "_header.h"
 
-
-bool _hold_lift = 0, compare;
+/*********************
+ *	    CONFIG
+ ********************/
+bool _hold_lift = 0;
+bool compare;
 int liftkeepms = 0;
 float liftTick = 0;
+
 create_action_ptr(lift);
 
-void holdLift(){
-  liftTick = 0;
-  _hold_lift = true;
-}
-void releaseLift(){
-  _hold_lift = false;
-}
-void stopLift(){
-  releaseLift();
-  liftTick = 0;
-  liftgrp().move(0);
-}
+void stopLift();
+void holdLift();
+/*********************
+ *      TASKS
+ ********************/
+
 void KEEP_LIFT_SERVICE(void* param){
   wait(liftkeepms);
   stopLift();
 }
-void keepLift(int speed, int waitms = 0){
-  stopLift();
-  if(waitms == 0){
-    liftgrp().move(speed);
-  }else{
-    Action lift{0};
-    liftptr = &lift;
-    component_type_e_t = Lift;
-    liftTick = 1;
-    liftkeepms = waitms;
-    liftgrp().move(speed);
-    pros::Task keep_lift_service(KEEP_LIFT_SERVICE);
-  }
-}
+
+
 void HOLD_LIFT(void* param){
   while(true)
   {
@@ -52,9 +49,8 @@ void HOLD_LIFT(void* param){
     wait(5);
   }
 }
-void initLift(){
-  pros::Task hold_lift(HOLD_LIFT);
-}
+
+
 void LIFT_SERVICE(void *param){
   float pos;
   liftptr->timer.startTimer();
@@ -79,6 +75,53 @@ void LIFT_SERVICE(void *param){
   }
   liftptr->_end = true;
 }
+
+
+/*********************
+ *	CORE FUNCTIONS
+ ********************/
+void initLift(){
+  pros::Task hold_lift(HOLD_LIFT);
+}
+
+
+void holdLift(){
+  liftTick = 0;
+  _hold_lift = true;
+}
+
+
+void releaseLift(){
+  _hold_lift = false;
+}
+
+
+void stopLift(){
+  releaseLift();
+  liftTick = 0;
+  liftgrp().move(0);
+}
+
+
+/*********************
+ *	USER FUNCTIONS
+ ********************/
+void keepLift(int speed, int waitms = 0){
+  stopLift();
+  if(waitms == 0){
+    liftgrp().move(speed);
+  }else{
+    Action lift{0};
+    liftptr = &lift;
+    component_type_e_t = Lift;
+    liftTick = 1;
+    liftkeepms = waitms;
+    liftgrp().move(speed);
+    pros::Task keep_lift_service(KEEP_LIFT_SERVICE);
+  }
+}
+
+
 Action moveLift(int targetDeg, int speed){
   Action lift{int(liftgrp().position())};
 

@@ -1,22 +1,30 @@
+/**
+ * \file module/claw.cpp
+ *
+ * all claw commands and functions
+ *
+ * Copyright (c) 2019-2020, by Eden Cheung.
+ * All rights reserved
+ */
+/*********************
+ *    INCLUDES
+ ********************/
 #include "_header.h"
 
+/*********************
+ *	    CONFIG
+ ********************/
 bool _hold_claw = 0;
 int clawkeepms = 0;
 bool isOpen = true;
 bool isNotFinished = false;
+
 create_action_ptr(claw);
 
-void stopClaw(){
-  _hold_claw = false;
-  clawgrp().move(0);
-  isNotFinished = false;
-}
-void holdClaw(){
-  _hold_claw = true;
-}
-void releaseClaw(){
-  _hold_claw = false;
-}
+void stopClaw();
+/*********************
+ *      TASKS
+ ********************/
 void HOLD_CLAW(void* param){
   while(true){
     if(isOpen){
@@ -29,20 +37,6 @@ void HOLD_CLAW(void* param){
 void KEEP_CLAW_SERVICE(void* param){
   wait(clawkeepms);
   stopClaw();
-}
-void keepClaw(int speed, int waitms = 0){
-  stopClaw();
-  if(waitms == 0){
-    clawgrp().move(speed);
-  }else{
-    Action claw{0};
-    clawptr = &claw;
-    component_type_e_t = Claw;
-    isNotFinished = true;
-    clawkeepms = waitms;
-    clawgrp().move(speed);
-    pros::Task keep_claw_service(KEEP_CLAW_SERVICE);
-  }
 }
 void OPEN_SERVICE(void* param){
   float pos;
@@ -75,6 +69,51 @@ void CLOSE_SERVICE(void* param){
   clawptr->_end = true;
   isNotFinished = false;
 }
+
+
+/*********************
+ *	CORE FUNCTIONS
+ ********************/
+ void initClaw(){
+   pros::Task hold_claw(HOLD_CLAW);
+ }
+
+
+void stopClaw(){
+  _hold_claw = false;
+  clawgrp().move(0);
+  isNotFinished = false;
+}
+
+
+void holdClaw(){
+  _hold_claw = true;
+}
+
+
+/*********************
+ *	USER FUNCTIONS
+ ********************/
+void releaseClaw(){
+  _hold_claw = false;
+}
+
+
+void keepClaw(int speed, int waitms = 0){
+  stopClaw();
+  if(waitms == 0){
+    clawgrp().move(speed);
+  }else{
+    Action claw{0};
+    clawptr = &claw;
+    component_type_e_t = Claw;
+    isNotFinished = true;
+    clawkeepms = waitms;
+    clawgrp().move(speed);
+    pros::Task keep_claw_service(KEEP_CLAW_SERVICE);
+  }
+}
+
 
 Action openClaw(int speed){
   Action claw{int(clawgrp().position())};
@@ -113,7 +152,4 @@ Action closeClaw(int speed){
   pros::Task close_service(CLOSE_SERVICE);
 
   return claw;
-}
-void initClaw(){
-  pros::Task hold_claw(HOLD_CLAW);
 }

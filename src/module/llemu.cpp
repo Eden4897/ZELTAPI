@@ -1,3 +1,11 @@
+/**
+ * \file module/llemu.cpp
+ *
+ * all llemu commands and functions
+ *
+ * Copyright (c) 2019-2020, by Eden Cheung.
+ * All rights reserved
+ */
 #include "_header.h"
 
 bool isBlueSide = false;

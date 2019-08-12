@@ -1,3 +1,11 @@
+/**
+ * \file module/core.cpp
+ *
+ * all core commands, functions and structs
+ *
+ * Copyright (c) 2019-2020, by Eden Cheung.
+ * All rights reserved
+ */
 #include "_header.h"
 
 component_type_e component_type_e_t;

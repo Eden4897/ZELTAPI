@@ -1,3 +1,11 @@
+/**
+ * \file module/pid.cpp
+ *
+ * all functions is the PID class
+ *
+ * Copyright (c) 2019-2020, by Eden Cheung.
+ * All rights reserved
+ */
 #include "_header.h"
 
   // Kp -  proportional gain

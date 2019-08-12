@@ -1,30 +1,47 @@
+/**
+ * \file module/drive.cpp
+ *
+ * all drive commands and functions
+ *
+ * Copyright (c) 2019-2020, by Eden Cheung.
+ * All rights reserved
+ */
 /*********************
- *     includes
+ *    INCLUDES
  ********************/
  #include "_header.h"
 
 /*********************
- *	    set up
+ *	    CONFIG
  ********************/
+
 bool _hold_move = 0;
-int moveLspeed = 0,moveRspeed = 0,moveLimit = 0,movekeepms = 0;
-float moveTick = 0, moveFix = 0, moveBuffer = 0;
-int fixedAngle, absAngle;
+int moveLspeed = 0;
+int moveRspeed = 0;
+int moveLimit = 0;
+int movekeepms = 0;
+float moveTick = 0;
+int moveFix = 0;
+int moveBuffer = 0;
+int fixedAngle;
+int absAngle;
+
+create_action_ptr(drive);
 
 enum angle_detection_sensor_e{
   Gyro, Encoder
 }angle_detection_sensor_e_t = Gyro;
 
-create_action_ptr(drive);
 
 enum brake_mode_e {
 	MOVE_RELEASE, MOVE_BRAKE, MOVE_HOLD
 }brake_mode_e_t;
+
 void stopMove();
 void endMove();
 
 /*********************
- *      tasks
+ *      TASKS
  ********************/
 void KEEP_MOVE_SERVICE(void* param) {
 	wait(movekeepms);
@@ -186,7 +203,7 @@ void GYRO_SERVICE(void* param){
 
 
 /*********************
- *	basic functions
+ *	CORE FUNCTIONS
  ********************/
 void initMove() {
 	pros::Task hold_service(HOLD_MOVE);
@@ -270,7 +287,7 @@ void endMove() {
 
 
 /*********************
- *	   functions
+ *	USER FUNCTIONS
  ********************/
 Action forward(int cm, int speed = 0, brake_mode_e brakeMode = MOVE_BRAKE) {
 	Action drive{ 0 };
@@ -355,7 +372,7 @@ Action absBackward(int cm, int speed = 0, brake_mode_e brakeMode = MOVE_BRAKE, f
 }
 
 
-Action turnLeft(int degrees, int speed = 0, brake_mode_e brakeMode = MOVE_BRAKE) {
+Action turnLeft(int degrees, int speed = 0, brake_mode_e brakeMode = MOVE_BRAKE, angle_detection_sensor_e sensorType = Encoder) {
 	Action turn{ 0 };
 
 	stopMove();
@@ -367,6 +384,8 @@ Action turnLeft(int degrees, int speed = 0, brake_mode_e brakeMode = MOVE_BRAKE)
 	rightDrive().move(speed);
 	moveLspeed = -speed;
 	moveRspeed = speed;
+
+  angle_detection_sensor_e_t = sensorType;
 
   if(angle_detection_sensor_e_t == Encoder){
     moveTick = degrees * TICKS_PER_DEGREE;

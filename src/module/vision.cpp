@@ -1,3 +1,11 @@
+/**
+ * \file module/vision.cpp
+ *
+ * all vision commands and functions
+ *
+ * Copyright (c) 2019-2020, by Eden Cheung.
+ * All rights reserved
+ */
 #include "_header.h"
 
 namespace vision{

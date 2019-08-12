@@ -1,21 +1,35 @@
+/**
+ * \file module/roller.cpp
+ *
+ * all roller commands and functions
+ *
+ * Copyright (c) 2019-2020, by Eden Cheung.
+ * All rights reserved
+ */
+/*********************
+ *    INCLUDES
+ ********************/
 #include "_header.h"
 
+/*********************
+ *	    CONFIG
+ ********************/
 bool _hold_roller = 0;
 int rollerkeepms = 0;
 float rollerTick = 0;
+
 create_action_ptr(roller);
 
-void stopRoller(){
-  _hold_roller = false;
-  rollergrp().move(0);
-  rollerTick = 0;
+void stopRoller();
+/*********************
+ *      TASKS
+ ********************/
+void KEEP_ROLLER_SERVICE(void* param){
+  wait(rollerkeepms);
+  stopRoller();
 }
-void holdRoller(){
-  _hold_roller = true;
-}
-void releaseRoller(){
-  _hold_roller = false;
-}
+
+
 void HOLD_ROLLER(void* param){
   while(true)
   {
@@ -32,24 +46,8 @@ void HOLD_ROLLER(void* param){
     wait(5);
   }
 }
-void KEEP_ROLLER_SERVICE(void* param){
-  wait(rollerkeepms);
-  stopRoller();
-}
-void keepRoller(int speed,int waitms = 0){
-  stopRoller();
-  if(waitms == 0){
-    rollergrp().move(speed);
-  }else{
-    Action roller{0};
-    rollerptr = &roller;
-    component_type_e_t = Roller;
-    rollerTick = 1;
-    rollerkeepms = waitms;
-    rollergrp().move(speed);
-    pros::Task keep_roller_service(KEEP_ROLLER_SERVICE);
-  }
-}
+
+
 void ROLLER_SERVICE(void* param){
   float pos;
   rollerptr->timer.startTimer();
@@ -68,6 +66,49 @@ void ROLLER_SERVICE(void* param){
   }
   rollerptr->_end = true;
 }
+/*********************
+ *	CORE FUNCTIONS
+ ********************/
+void initRoller(){
+  pros::Task hold_roller(HOLD_ROLLER);
+}
+
+
+void stopRoller(){
+  _hold_roller = false;
+  rollergrp().move(0);
+  rollerTick = 0;
+}
+
+
+void holdRoller(){
+  _hold_roller = true;
+}
+
+
+void releaseRoller(){
+  _hold_roller = false;
+}
+
+
+/*********************
+ *	USER FUNCTIONS
+ ********************/
+void keepRoller(int speed,int waitms = 0){
+  stopRoller();
+  if(waitms == 0){
+    rollergrp().move(speed);
+  }else{
+    Action roller{0};
+    rollerptr = &roller;
+    component_type_e_t = Roller;
+    rollerTick = 1;
+    rollerkeepms = waitms;
+    rollergrp().move(speed);
+    pros::Task keep_roller_service(KEEP_ROLLER_SERVICE);
+  }
+}
+
 Action moveRoller(float revolutions, int speed){
   Action roller{0};
 
@@ -86,7 +127,4 @@ Action moveRoller(float revolutions, int speed){
   pros::Task roller_service(ROLLER_SERVICE);
 
   return roller;
-}
-void initRoller(){
-  pros::Task hold_roller(HOLD_ROLLER);
 }
