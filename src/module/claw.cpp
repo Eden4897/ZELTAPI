@@ -37,6 +37,7 @@ void keepClaw(int speed, int waitms = 0){
   }else{
     Action claw{0};
     clawptr = &claw;
+    component_type_e_t = Claw;
     isNotFinished = true;
     clawkeepms = waitms;
     clawgrp().move(speed);
@@ -112,4 +113,7 @@ Action closeClaw(int speed){
   pros::Task close_service(CLOSE_SERVICE);
 
   return claw;
+}
+void initClaw(){
+  pros::Task hold_claw(HOLD_CLAW);
 }

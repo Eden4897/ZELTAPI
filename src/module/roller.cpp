@@ -41,6 +41,9 @@ void keepRoller(int speed,int waitms = 0){
   if(waitms == 0){
     rollergrp().move(speed);
   }else{
+    Action roller{0};
+    rollerptr = &roller;
+    component_type_e_t = Roller;
     rollerTick = 1;
     rollerkeepms = waitms;
     rollergrp().move(speed);

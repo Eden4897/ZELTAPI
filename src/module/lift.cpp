@@ -27,6 +27,9 @@ void keepLift(int speed, int waitms = 0){
   if(waitms == 0){
     liftgrp().move(speed);
   }else{
+    Action lift{0};
+    liftptr = &lift;
+    component_type_e_t = Lift;
     liftTick = 1;
     liftkeepms = waitms;
     liftgrp().move(speed);

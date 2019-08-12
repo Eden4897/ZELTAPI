@@ -4,4 +4,6 @@ void initialize(){
   wait(1000);
   initMove();
   initLift();
+  initRoller();
+  initClaw();
 }

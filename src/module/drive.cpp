@@ -22,7 +22,7 @@ enum brake_mode_e {
 void stopMove();
 void endMove();
 
-
+extern_motor_group(leftDrive);
 
 /*********************
 		 tasks
@@ -31,7 +31,6 @@ void KEEP_MOVE_SERVICE(void* param) {
 	wait(movekeepms);
 	stopMove();
 }
-extern_motor_group(leftDrive);
 
 void HOLD_MOVE(void* param) {
 	while (true) {
@@ -186,6 +185,7 @@ void keepMove(int leftspeed, int rightspeed, int waitms = 0) {
 	else {
     Action drive{0};
     driveptr = &drive;
+    component_type_e_t = Drive;
 		moveTick = 1;
 		movekeepms = waitms;
 		leftDrive().move(leftspeed);
@@ -196,13 +196,16 @@ void keepMove(int leftspeed, int rightspeed, int waitms = 0) {
 
 
 void brakeMove(void* param) {
+  Action drive{0};
+  driveptr = &drive;
+  component_type_e_t = Drive;
 	_hold_move = 0;
-	moveTick = 0;
 	leftDrive().move(leftDrive().speed / -3.5);
 	rightDrive().move(rightDrive().speed / -3.5);
 	wait(200);
 	leftDrive().move(0);
 	rightDrive().move(0);
+  moveTick = 0;
 }
 
 
