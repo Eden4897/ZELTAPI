@@ -1,3 +1,11 @@
+/**
+ * \file zeltapi/module/core.hpp
+ *
+ * core header
+ *
+ * Copyright (c) 2019-2020, by Eden Cheung.
+ * All rights reserved
+ */
 #include "main.h"
 
 #ifndef _ZELTAPI_CORE_HPP_

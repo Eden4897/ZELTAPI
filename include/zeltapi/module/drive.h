@@ -1,3 +1,11 @@
+/**
+ * \file zeltapi/module/drive.h
+ *
+ * drive header
+ *
+ * Copyright (c) 2019-2020, by Eden Cheung.
+ * All rights reserved
+ */
 #ifndef _ZELTAPI_DRIVE_H_
 #define _ZELTAPI_DRIVE_H_
 

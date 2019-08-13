@@ -1,3 +1,11 @@
+/**
+ * \file zeltapi/gloabals.h
+ *
+ * all global variables 
+ *
+ * Copyright (c) 2019-2020, by Eden Cheung.
+ * All rights reserved
+ */
 #include "module/core.hpp"
 #include "module/pid.h"
 extern_motor_group(fullDrive);

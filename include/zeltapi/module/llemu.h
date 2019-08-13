@@ -1,3 +1,11 @@
+/**
+ * \file zeltapi/module/llemu.hpp
+ *
+ * llemu header
+ *
+ * Copyright (c) 2019-2020, by Eden Cheung.
+ * All rights reserved
+ */
 #ifndef _ZELTAPI_LLEMU_H_
 #define _ZELTAPI_LLEMU_H_
 #include "main.h"

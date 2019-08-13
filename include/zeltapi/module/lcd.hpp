@@ -1,3 +1,11 @@
+/**
+ * \file zeltapi/module/lcd.hpp
+ *
+ * lcd header
+ *
+ * Copyright (c) 2019-2020, by Eden Cheung.
+ * All rights reserved
+ */
 #ifndef _ZELTAPI_LCD_H_
 #define _ZELTAPI_LCD_H_
 

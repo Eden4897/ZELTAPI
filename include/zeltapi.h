@@ -1,3 +1,11 @@
+/**
+ * \file zeltapi.h
+ *
+ * includes all headers
+ *
+ * Copyright (c) 2019-2020, by Eden Cheung.
+ * All rights reserved
+ */
 #ifndef _ZELTAPI_H_
 #define _ZELTAPI_H_
 /*********************

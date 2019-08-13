@@ -1,3 +1,11 @@
+/**
+ * \file zeltapi/module/lift.hpp
+ *
+ * lift header
+ *
+ * Copyright (c) 2019-2020, by Eden Cheung.
+ * All rights reserved
+ */
 #ifndef _ZELTAPI_LIFT_H_
 #define _ZELTAPI_LIFT_H_
 

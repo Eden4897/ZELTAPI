@@ -1,3 +1,11 @@
+/**
+ * \file zeltapi/module/vision.hpp
+ *
+ * vision header
+ *
+ * Copyright (c) 2019-2020, by Eden Cheung.
+ * All rights reserved
+ */
 #ifndef _ZELTAPI_VISION_H_
 #define _ZELTAPI_VISION_H_
 #include "main.h"

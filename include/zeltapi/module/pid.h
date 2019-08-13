@@ -1,3 +1,11 @@
+/**
+ * \file zeltapi/module/pid.hpp
+ *
+ * pid header
+ *
+ * Copyright (c) 2019-2020, by Eden Cheung.
+ * All rights reserved
+ */
 #ifndef _ZELTAPI_PID_H_
 #define _ZELTAPI_PID_H_
 #include "main.h"

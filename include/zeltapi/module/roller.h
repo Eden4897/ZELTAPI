@@ -1,3 +1,11 @@
+/**
+ * \file zeltapi/module/roller.hpp
+ *
+ * roller header
+ *
+ * Copyright (c) 2019-2020, by Eden Cheung.
+ * All rights reserved
+ */
 #ifndef _ZELTAPI_ROLLER_H_
 #define _ZELTAPI_ROLLER_H_
 #include "core.hpp"
