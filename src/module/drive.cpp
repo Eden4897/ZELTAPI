@@ -10,6 +10,8 @@
  *    INCLUDES
  ********************/
  #include "_header.h"
+ #include <vector>
+ #include <initializer_list>
 
 /*********************
  *	    CONFIG
@@ -25,6 +27,7 @@ int moveFix = 0;
 int moveBuffer = 0;
 int fixedAngle;
 int absAngle;
+std::vector<int> move_speed_set;
 
 create_action_ptr(drive);
 
@@ -68,11 +71,24 @@ void HOLD_MOVE(void* param) {
 
 void DRIVE_SERVICE(void* param) {
 	float leftPos, rightPos;
+  float speed;
+  int slowSpeed = move_speed_set[0];
+  int fastSpeed = move_speed_set[1];
+  int speedDiff = fastSpeed - slowSpeed;
+  float percentFinished;
 
 	driveptr->timer.startTimer();
 	while (1) {
 		leftPos = fabs(leftDrive().position());
 		rightPos = fabs(rightDrive().position());
+
+    percentFinished = fabs(fullDrive().position()) / moveTick;
+    speed = fastSpeed - (percentFinished * speedDiff);
+
+    leftDrive().move(speed);
+  	rightDrive().move(speed);
+  	moveLspeed = speed;
+  	moveRspeed = speed;
 		if (leftPos >= moveTick || rightPos >= moveTick) {
 			driveptr->timer.stopTimer();
 			endMove();
@@ -91,7 +107,12 @@ void ABS_DRIVE_SERVICE(void* param) {
 	float leftPos, rightPos;
 	float constSpeed = moveLspeed;
 	float differ, fix;
-	int counter = 0;
+  int speed;
+  int initGyroPos = fixedAngle;
+  int slowSpeed = move_speed_set[0];
+  int fastSpeed = move_speed_set[1];
+  int speedDiff = fastSpeed - slowSpeed;
+  float percentFinished;
 	driveptr->timer.startTimer();
 	while (1) {
 		differ = rightDrive().position(0) - leftDrive().position(0);
@@ -99,16 +120,22 @@ void ABS_DRIVE_SERVICE(void* param) {
 
 		leftPos = fabs(leftDrive().position());
 		rightPos = fabs(rightDrive().position());
-		lcd_print(0, "moveTick = %d", moveTick);
-		lcd_print(1, "leftPos = %d", leftPos);
-		lcd_print(2, "rightPos = %d", rightPos);
+
+    percentFinished = fabs(fullDrive().position()) / moveTick;
+    speed = fastSpeed - (percentFinished * speedDiff);
+
+    leftDrive().move(speed);
+    rightDrive().move(speed);
+    moveLspeed = speed;
+    moveRspeed = speed;
+    constSpeed = moveLspeed;
+
 		if (leftPos >= moveTick || rightPos >= moveTick) {
 			driveptr->timer.stopTimer();
 			endMove();
 			break;
 		}
 		if (fabs(differ) >= moveBuffer) {
-			counter++;
 			moveLspeed = constSpeed + fix;
 			moveRspeed = constSpeed - fix;
 
@@ -153,7 +180,12 @@ void ABS_DRIVE_SERVICE(void* param) {
 
 void TURN_SERVICE(void* param) {
   	float leftPos, rightPos;
+    int speed;
     int initGyroPos = fixedAngle;
+    int slowSpeed = move_speed_set[0];
+    int fastSpeed = move_speed_set[1];
+    int speedDiff = fastSpeed - slowSpeed;
+    float percentFinished;
     int nowAngleDifference;//basically means the angle the robot has turned
 
   	driveptr->timer.startTimer();
@@ -161,9 +193,15 @@ void TURN_SERVICE(void* param) {
       if(angle_detection_sensor_e_t == Encoder){
         leftPos = fabs(leftDrive().position());
     		rightPos = fabs(rightDrive().position());
-    		lcd_print(0, "moveTick = %d", moveTick);
-    		lcd_print(1, "leftPos = %d", leftPos);
-    		lcd_print(2, "rightPos = %d", rightPos);
+
+        percentFinished = leftPos / moveTick;
+        speed = fastSpeed - (percentFinished * speedDiff);
+
+        leftDrive().move(-speed);
+      	rightDrive().move(speed);
+      	moveLspeed = -speed;
+      	moveRspeed = speed;
+
     		if (leftPos >= moveTick || rightPos >= moveTick) {
     			driveptr->timer.stopTimer();
     			endMove();
@@ -172,6 +210,13 @@ void TURN_SERVICE(void* param) {
     		//returns in deg not ticks for simplicity
     		driveptr->_value = leftDrive().position() / TICKS_PER_DEGREE;
       }else{
+        percentFinished = abs(nowAngleDifference) / moveTick;
+        speed = fastSpeed - (percentFinished * speedDiff);
+
+        leftDrive().move(-speed);
+      	rightDrive().move(speed);
+      	moveLspeed = -speed;
+      	moveRspeed = speed;
         nowAngleDifference = abs(fixedAngle - initGyroPos);
         if(nowAngleDifference >= moveTick){
           driveptr->timer.stopTimer();
@@ -180,13 +225,44 @@ void TURN_SERVICE(void* param) {
         }
         driveptr->_value = nowAngleDifference;
       }
-
-
   		wait(5);
   	}
-
-
 	driveptr->_end = true;
+}
+void TURN_AZIMUTH_SERVICE(void* param){
+  int initGyroPos = absAngle;
+  int initAbsAngleDiff = fabs(initGyroPos - moveTick);
+  int absAngleDiff;
+  int speed;
+  int slowSpeed = move_speed_set[0];
+  int fastSpeed = move_speed_set[1];
+  int speedDiff = fastSpeed - slowSpeed;
+  float percentFinished;
+
+  driveptr->timer.startTimer();
+  while (1) {
+    absAngleDiff = fabs(absAngle - moveTick);
+
+    percentFinished = absAngleDiff / initAbsAngleDiff;
+    speed = fastSpeed - (percentFinished * speedDiff);
+
+    leftDrive().move(-speed);
+    rightDrive().move(speed);
+    moveLspeed = -speed;
+    moveRspeed = speed;
+
+    if(absAngle <= initGyroPos){
+      driveptr->timer.stopTimer();
+      endMove();
+      break;
+    }
+    driveptr->_value = absAngle;
+  }
+    wait(5);
+driveptr->_end = true;
+}
+void CURVE_SERVICE(void* param){
+
 }
 void GYRO_SERVICE(void* param){
   // pros::ADIAnalogIn sensor(gyroPort);
@@ -289,7 +365,63 @@ void endMove() {
 /*********************
  *	USER FUNCTIONS
  ********************/
-Action forward(int cm, int speed = 0, brake_mode_e brakeMode = MOVE_BRAKE) {
+Action forward(int cm,
+               std::initializer_list<int> speedSet,
+               brake_mode_e brakeMode = MOVE_BRAKE){
+  Action drive{0};
+
+  stopMove();
+
+  leftDrive().tare();
+  rightDrive().tare();
+
+  move_speed_set = std::vector(speedSet);
+
+  moveTick = ((cm / (WHEEL_DIAMETER * 3.14159)) * 900);
+
+  driveptr = &drive;
+
+  brake_mode_e_t = brakeMode;
+
+  component_type_e_t = Drive;
+
+	pros::Task drive_service(DRIVE_SERVICE);
+
+  return drive;
+}
+
+
+Action forward(int cm,
+               int speed = 0,
+               brake_mode_e brakeMode = MOVE_BRAKE){
+  return forward(cm,{speed,speed},brakeMode);
+}
+
+
+Action backward(int cm,
+                std::initializer_list<int> speedSet,
+                brake_mode_e brakeMode = MOVE_BRAKE){
+  std::vector<int> temp = std::vector(speedSet);
+
+  temp[0] = -temp[0];
+  temp[1] = -temp[1];
+
+  return forward(cm,{temp[0],temp[1]},brakeMode);
+}
+
+
+Action backward(int cm,
+                int speed = 0,
+                brake_mode_e brakeMode = MOVE_BRAKE) {
+	return backward(cm, {speed,speed}, brakeMode);
+}
+
+
+Action absForward(int cm,
+                  std::initializer_list<int> speedSet,
+                  brake_mode_e brakeMode = MOVE_BRAKE,
+                  float fix = 0.01,
+                  float buffer = 1) {
 	Action drive{ 0 };
 
 	stopMove();
@@ -297,44 +429,7 @@ Action forward(int cm, int speed = 0, brake_mode_e brakeMode = MOVE_BRAKE) {
 	leftDrive().tare();
 	rightDrive().tare();
 
-	moveTick = ((cm / (WHEEL_DIAMETER * 3.14159)) * 900);
-
-	driveptr = &drive;
-
-	brake_mode_e_t = brakeMode;
-
-	component_type_e_t = Drive;
-	//activate pid?
-
-	if (speed != 0) {
-
-		leftDrive().move(speed);
-		rightDrive().move(speed);
-		moveLspeed = speed;
-		moveRspeed = speed;
-
-		pros::Task drive_service(DRIVE_SERVICE);
-
-	}
-	else {
-		// pros::Task pid_drive_service(PID_DRIVE_SERVICE);
-	}
-	return drive;
-}
-
-
-Action backward(int cm, int speed = 0, brake_mode_e brakeMode = MOVE_BRAKE) {
-	return forward(cm, -speed, brakeMode);
-}
-
-
-Action absForward(int cm, int speed = 0, brake_mode_e brakeMode = MOVE_BRAKE, float fix = 0.01, float buffer = 1) {
-	Action drive{ 0 };
-
-	stopMove();
-
-	leftDrive().tare();
-	rightDrive().tare();
+  move_speed_set = std::vector(speedSet);
 
 	moveTick = ((cm / (WHEEL_DIAMETER * 3.14159)) * 900);
 
@@ -348,31 +443,40 @@ Action absForward(int cm, int speed = 0, brake_mode_e brakeMode = MOVE_BRAKE, fl
 
 	moveFix = fix;
 
-	//activate pid?
+	pros::Task drive_service(ABS_DRIVE_SERVICE);
 
-	if (speed != 0) {
-
-		leftDrive().move(speed);
-		rightDrive().move(speed);
-		moveLspeed = speed;
-		moveRspeed = speed;
-
-		pros::Task drive_service(ABS_DRIVE_SERVICE);
-
-	}
-	else {
-		// pros::Task pid_drive_service(PID_ABS_DRIVE_SERVICE);
-	}
 	return drive;
 }
 
+Action absForward(int cm,
+                  int speed,
+                  brake_mode_e brakeMode = MOVE_BRAKE,
+                  float fix = 0.01,
+                  float buffer = 1) {
+return absForward(cm,{speed,speed},brakeMode,fix,buffer);
+}
+Action absBackward(int cm,
+                   std::initializer_list<int> speedSet,
+                   brake_mode_e brakeMode = MOVE_BRAKE,
+                   float fix = 0.01,
+                   float buffer = 1) {
+  std::vector<int> temp = std::vector(speedSet);
 
-Action absBackward(int cm, int speed = 0, brake_mode_e brakeMode = MOVE_BRAKE, float fix = 0.01, float buffer = 1) {
-	return absForward(cm, -speed, brakeMode, fix, buffer);
+  temp[0] = -temp[0];
+  temp[1] = -temp[1];
+	return absForward(cm,{temp[0],temp[1]}, brakeMode, fix, buffer);
+}
+Action absBackward(int cm,
+                   int speed,
+                   brake_mode_e brakeMode = MOVE_BRAKE,
+                   float fix = 0.01,
+                   float buffer = 1) {
+return absBackward(cm,{speed,speed},brakeMode,fix,buffer);
 }
 
-
-Action turnLeft(int degrees, int speed = 0, brake_mode_e brakeMode = MOVE_BRAKE, angle_detection_sensor_e sensorType = Encoder) {
+Action turnLeft(int degrees,
+                std::initializer_list<int> speedSet,
+                brake_mode_e brakeMode = MOVE_BRAKE) {
 	Action turn{ 0 };
 
 	stopMove();
@@ -380,12 +484,7 @@ Action turnLeft(int degrees, int speed = 0, brake_mode_e brakeMode = MOVE_BRAKE,
 	leftDrive().tare();
 	rightDrive().tare();
 
-	leftDrive().move(-speed);
-	rightDrive().move(speed);
-	moveLspeed = -speed;
-	moveRspeed = speed;
-
-  angle_detection_sensor_e_t = sensorType;
+  move_speed_set = std::vector(speedSet);
 
   if(angle_detection_sensor_e_t == Encoder){
     moveTick = degrees * TICKS_PER_DEGREE;
@@ -402,8 +501,65 @@ Action turnLeft(int degrees, int speed = 0, brake_mode_e brakeMode = MOVE_BRAKE,
 
 	return turn;
 }
+Action turnLeft(int degrees,
+                int speed,
+                brake_mode_e brakeMode = MOVE_BRAKE) {
+  return turnLeft(degrees,{speed,speed},brakeMode);
+}
 
+Action turnRight(int degrees,
+                 std::initializer_list<int> speedSet,
+                 brake_mode_e brakeMode = MOVE_BRAKE) {
+  std::vector<int> temp = std::vector(speedSet);
 
-Action turnRight(int degrees, int speed = 0, brake_mode_e brakeMode = MOVE_BRAKE) {
-	return turnLeft(degrees, -speed, brakeMode);
+  temp[0] = -temp[0];
+  temp[1] = -temp[1];
+	return turnLeft(degrees, {temp[0],temp[1]}, brakeMode);
+}
+Action turnRight(int degrees,
+                int speed,
+                brake_mode_e brakeMode = MOVE_BRAKE) {
+  return turnRight(degrees,{speed,speed},brakeMode);
+}
+Action turnLeftToAzimuth(int degrees,
+                         std::initializer_list<int> speedSet,
+                         brake_mode_e brakeMode = MOVE_BRAKE){
+  Action turn{absAngle};
+
+  if(angle_detection_sensor_e_t == Gyro){
+    stopMove();
+
+  	leftDrive().tare();
+  	rightDrive().tare();
+
+    moveTick = degrees;
+
+    driveptr = &turn;
+
+  	component_type_e_t = Drive;
+
+  	brake_mode_e_t = brakeMode;
+
+  	pros::Task turn_azimuth_service(TURN_AZIMUTH_SERVICE);
+  }
+  return turn;
+}
+Action turnLeftToAzimuth(int degrees,
+                         int speed,
+                         brake_mode_e brakeMode = MOVE_BRAKE){
+  return turnLeftToAzimuth(degrees,{speed,speed},brakeMode);
+}
+Action turnRightToAzimuth(int degrees,
+                          std::initializer_list<int> speedSet,
+                          brake_mode_e brakeMode = MOVE_BRAKE){
+  std::vector<int> temp = std::vector(speedSet);
+
+  temp[0] = -temp[0];
+  temp[1] = -temp[1];
+  return turnLeftToAzimuth(degrees, {temp[0],temp[1]}, brakeMode);
+}
+Action turnRightToAzimuth(int degrees,
+                          int speed,
+                          brake_mode_e brakeMode = MOVE_BRAKE){
+  return turnRightToAzimuth(degrees,{speed,speed},brakeMode);
 }
