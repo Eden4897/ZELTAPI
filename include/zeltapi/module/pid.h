@@ -12,14 +12,17 @@
 #include <vector>
 #include <initializer_list>
 struct PID{
-  // Kp -  proportional gain
-  // Ki -  Integral gain
-  // Kd -  derivative gain
+  // Kp  - proportional gain
+  // Ki  - Integral gain
+  // Kd  - derivative gain
   // max - maximum value of manipulated variable
   // min - minimum value of manipulated variable
-
   double max,min,Kp,Ki,Kd;
 
+  //the max value which the program will use Ki
+  double _intergral_buffer = 0;
+
+  //the min value which the program will use kD
   double _derivative_buffer = 0;
 
   double _output = 0;
@@ -30,18 +33,12 @@ struct PID{
 
   double _error_change = 0;
 
-  double _intergral_buffer = 0;
-
-  double _target = 0;
 
   double _error = 0;
 
-  PID(double Imax, double Imin, double IKp, double IKi, double IKd);
+  PID(double inKp, double inKi, double inKd, double inMax, double inMin);
 
-  void setUp(double setPoint,\
-    double integralBuffer, double derivativeBuffer);
-
-  double calculate(double input);
+  double calculate(double setPoint, double value);
 
   void reset();
 };

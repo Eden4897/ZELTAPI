@@ -124,31 +124,34 @@ void ABS_DRIVE_SERVICE(void* param) {
 }
 
 
-// void PID_DRIVE_SERVICE(void* param){
-//   float leftPos, rightPos;
-//   pidLeftDrive().start(moveTick);
-//   pidRightDrive().start(moveTick);
-//   driveptr->timer.startTimer();
-//   while(1){
-//     leftPos = fabs(leftDrive().position());
-//     rightPos = fabs(rightDrive().position());
-//     leftDrive().move(pidLeftDrive().get());
-//     rightDrive().move(pidRightDrive().get());
-//     lcd_print(0,"moveTick = %d",moveTick);
-//     lcd_print(1,"leftPos = %d",leftPos);
-//     lcd_print(2,"rightPos = %d",rightPos);
-//     if(leftPos>moveTick||rightPos>moveTick){
-//       driveptr->timer.stopTimer();
-//       endMove();
-//       break;
-//     }
-//     //returns in cm not ticks for simplicity
-//     driveptr->_value = (leftDrive().position() / 900) * (WHEEL_DIAMETER * 3.14159);
-//     wait(5);
-//   }
-//
-//   driveptr->_end = true;
-// }
+void PID_DRIVE_SERVICE(void* param){
+  float leftPos, rightPos;
+  short polarity;
+  driveptr->timer.startTimer();
+  while(1){
+    leftPos = fabs(leftDrive().position());
+    rightPos = fabs(rightDrive().position());
+
+    //1 if speed is positive, -1 if speed is negative 
+    polarity = abs(leftDrive().speed)/leftDrive().speed;
+
+    leftDrive().move(pidLeftDrive().calculate(moveTick,leftPos) * polarity);
+    rightDrive().move(pidRightDrive().calculate(moveTick,rightPos) * polarity);
+
+    if(leftPos>moveTick||rightPos>moveTick){
+      driveptr->timer.stopTimer();
+      endMove();
+      pidLeftDrive().reset()
+      pidRightDrive().reset()
+      break;
+    }
+    //returns in cm not ticks for simplicity
+    driveptr->_value = (fullDrive().position() / 900) * (WHEEL_DIAMETER * 3.14159);
+    wait(5);
+  }
+
+  driveptr->_end = true;
+}
 
 
 void TURN_SERVICE(void* param) {
@@ -304,8 +307,8 @@ Action forward(int cm, int speed = 0, brake_mode_e brakeMode = MOVE_BRAKE) {
 	brake_mode_e_t = brakeMode;
 
 	component_type_e_t = Drive;
-	//activate pid?
 
+	//activate pid?
 	if (speed != 0) {
 
 		leftDrive().move(speed);
@@ -317,7 +320,7 @@ Action forward(int cm, int speed = 0, brake_mode_e brakeMode = MOVE_BRAKE) {
 
 	}
 	else {
-		// pros::Task pid_drive_service(PID_DRIVE_SERVICE);
+	  pros::Task pid_drive_service(PID_DRIVE_SERVICE);
 	}
 	return drive;
 }
