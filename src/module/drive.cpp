@@ -187,13 +187,8 @@ void TURN_SERVICE(void* param) {
 
   		wait(5);
   	}
-<<<<<<< HEAD
 
 
-=======
-
-
->>>>>>> parent of 3734d3b... :sparkles:Implementing speed set:construction:,needs testing
 	driveptr->_end = true;
 }
 void GYRO_SERVICE(void* param){
@@ -312,13 +307,8 @@ Action forward(int cm, int speed = 0, brake_mode_e brakeMode = MOVE_BRAKE) {
 	brake_mode_e_t = brakeMode;
 
 	component_type_e_t = Drive;
-<<<<<<< HEAD
 
 	//activate pid?
-=======
-	//activate pid?
-
->>>>>>> parent of 3734d3b... :sparkles:Implementing speed set:construction:,needs testing
 	if (speed != 0) {
 
 		leftDrive().move(speed);
@@ -330,11 +320,7 @@ Action forward(int cm, int speed = 0, brake_mode_e brakeMode = MOVE_BRAKE) {
 
 	}
 	else {
-<<<<<<< HEAD
 	  pros::Task pid_drive_service(PID_DRIVE_SERVICE);
-=======
-		// pros::Task pid_drive_service(PID_DRIVE_SERVICE);
->>>>>>> parent of 3734d3b... :sparkles:Implementing speed set:construction:,needs testing
 	}
 	return drive;
 }
@@ -366,7 +352,6 @@ Action absForward(int cm, int speed = 0, brake_mode_e brakeMode = MOVE_BRAKE, fl
 	moveFix = fix;
 
 	//activate pid?
-<<<<<<< HEAD
 
 	if (speed != 0) {
 
@@ -375,16 +360,6 @@ Action absForward(int cm, int speed = 0, brake_mode_e brakeMode = MOVE_BRAKE, fl
 		moveLspeed = speed;
 		moveRspeed = speed;
 
-=======
-
-	if (speed != 0) {
-
-		leftDrive().move(speed);
-		rightDrive().move(speed);
-		moveLspeed = speed;
-		moveRspeed = speed;
-
->>>>>>> parent of 3734d3b... :sparkles:Implementing speed set:construction:,needs testing
 		pros::Task drive_service(ABS_DRIVE_SERVICE);
 
 	}
